@@ -2,8 +2,8 @@
 
 Listings come from Barnstormers' "Piper PA-20 Pacer" category plus an
 advanced search on the ad headline "pacer". Only whole-aircraft-for-sale
-listings are published: every ad found is taken to be a Pacer unless its
-title names some other airplane (a Tri-Pacer, Cub, ...), and titles
+listings are published: each ad's title must say "Pacer", PA-20, or PA-22/20
+and not name some other airplane (a Tri-Pacer, Cub, ...), and titles
 that look like parts/accessories/services/raffles are dropped. Surviving
 titles are rewritten to a canonical "YEAR Piper MODEL" form so every listing
 follows the same format.
@@ -54,7 +54,10 @@ _PA20_RE = re.compile(
     re.IGNORECASE,
 )
 # A Tri-Pacer converted to tailwheel, sold as a "PA-22/20".
-_PA22_20_RE = re.compile(r"(?:\bpa\s?-?\s?)?22\s?[/-]\s?20(?!\d)", re.IGNORECASE)
+# Separators vary or vanish entirely ("PA-22/20", "22-20", "PA2220").
+_PA22_20_RE = re.compile(r"\bpa\s?-?\s?22\s?[/-]?\s?20(?!\d)|(?<!\d)22\s?[/-]\s?20(?!\d)", re.IGNORECASE)
+# "Pacer" as a whole word - not inside "spacers".
+_PACER_RE = re.compile(r"\bpacer", re.IGNORECASE)
 # Other Pipers. A title naming one of these (outside a 22/20 conversion) is
 # some other airplane that landed in this category, and is dropped.
 _OTHER_MODEL_RE = re.compile(
@@ -73,9 +76,11 @@ def _extract_model(title: str) -> tuple[str, str] | None:
         hp, seaplane = match.groups()
         code = "PA-20" + (f"-{hp}" if hp else "") + ("S" if seaplane else "")
         return MAKE, f"{code} Pacer"
-    # Everything in the category is a Pacer even when the title doesn't say, and
-    # every search hit has "pacer" in its headline.
-    return MAKE, "PA-20 Pacer"
+    # The category also carries engine and parts ads ("Lycoming O-290 0 SMOH"),
+    # so the title still has to say "Pacer" when it gives no model code.
+    if _PACER_RE.search(title):
+        return MAKE, "PA-20 Pacer"
+    return None
 
 
 def _title_from_url(url: str) -> str:

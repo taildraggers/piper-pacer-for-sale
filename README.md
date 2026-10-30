@@ -16,10 +16,11 @@ Daily aggregator of Piper Pacer aircraft classified listings from
   (falling back to regex heuristics over the visible text since the site doesn't
   expose structured data). The title is derived from the listing URL's own SEO slug,
   since every detail page shares one generic `<title>`/`<h1>`.
-- Only whole-aircraft-for-sale listings are published. Every ad found is taken to be
-  a Pacer unless its title names another airplane (a Tri-Pacer, Cub,
-  Cherokee, other PA- model, ...); a PA-22/20 - a Tri-Pacer converted to tailwheel -
-  counts as a Pacer. See `_PA20_RE`/`_PA22_20_RE`/`_OTHER_MODEL_RE` in
+- Only whole-aircraft-for-sale listings are published. Each ad's title must say
+  "Pacer" (as a whole word, so "spacers" doesn't count), a PA-20 model code, or a
+  PA-22/20 - a Tri-Pacer converted to tailwheel - since the category also carries
+  engine and parts ads; and it must not name another airplane (a Tri-Pacer, Cub,
+  Cherokee, other PA- model, ...). See `_PA20_RE`/`_PA22_20_RE`/`_PACER_RE`/`_OTHER_MODEL_RE` in
   `scraper/barnstormers.py`. Titles that read as parts, accessories, services, or
   raffles are dropped (phrases like "on floats" are allowed - see `ALLOWED_PHRASES`
   in `scraper/common.py`). Every surviving listing's title is rewritten to a
